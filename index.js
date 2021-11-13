@@ -3,7 +3,7 @@ const cors = require('cors')
 const { MongoClient } = require('mongodb');
 require('dotenv').config()
 const app = express()
-const port = process.env.port || 5000
+const port = process.env.PORT || 5000
 
 // firebase auth starts ***************************
 var admin = require("firebase-admin");
