@@ -6,10 +6,10 @@ const app = express()
 const port = process.env.port || 5000
 
 // firebase auth starts ***************************
-// doctors-portal-8e4f6-firebase-adminsdk-j0tga-3792fc418b.json
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./doctors-portal-8e4f6-firebase-adminsdk-j0tga-3792fc418b.json");
+// var serviceAccount = require("./doctors-portal-8e4f6-firebase-adminsdk-j0tga-3792fc418b.json");
+var serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
@@ -26,7 +26,9 @@ async function verifyToken(req, res, next){
   if(req.headers?.authorization?.startsWith('Bearer ')){
     const token = req.headers.authorization.split(' ')[1];
     try {
+      console.log('token', token)
       const decodedUser = await admin.auth().verifyIdToken(token);
+      console.log('decodedUser', decodedUser)
       req.decodedEmail = decodedUser.email;
     } catch (error) {
       
@@ -87,6 +89,7 @@ async function run(){
         app.put('/users/admin', verifyToken, async(req, res) =>{
           const useremail = req.body;
           const requesterEmail = req.decodedEmail;
+          console.log(requesterEmail)
           if (requesterEmail) {
             const requesterAccount = await usersCollection.findOne({email: requesterEmail});
             if (requesterAccount.role === 'admin') {
