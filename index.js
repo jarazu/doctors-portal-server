@@ -20,15 +20,12 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.v21cd.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-// console.log(uri)
 
 async function verifyToken(req, res, next){
   if(req.headers?.authorization?.startsWith('Bearer ')){
     const token = req.headers.authorization.split(' ')[1];
     try {
-      console.log('token', token)
       const decodedUser = await admin.auth().verifyIdToken(token);
-      console.log('decodedUser', decodedUser)
       req.decodedEmail = decodedUser.email;
     } catch (error) {
       
@@ -48,7 +45,6 @@ async function run(){
           const email = req.query.email;
           const date = req.query.date;
           const query = {email: email, date: date}
-          console.log(query)
           const cursor = appointmentsCollection.find(query);
           const appointments = await cursor.toArray();
           res.json(appointments);
@@ -89,11 +85,9 @@ async function run(){
         app.put('/users/admin', verifyToken, async(req, res) =>{
           const useremail = req.body;
           const requesterEmail = req.decodedEmail;
-          console.log(requesterEmail)
           if (requesterEmail) {
             const requesterAccount = await usersCollection.findOne({email: requesterEmail});
             if (requesterAccount.role === 'admin') {
-              console.log('headers', req.decodedEmail)
               const filter = {email: useremail.email}
               const updateDoc = {$set: {role: 'admin'}}
               const result = await usersCollection.updateOne(filter, updateDoc);
@@ -114,6 +108,7 @@ run().catch(console.dir);
 
 app.get('/', (req, res) => {
   res.send('Hello doctors portal!')
+  //
 })
 
 app.listen(port, () => {
